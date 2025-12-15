@@ -3,7 +3,7 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_qdrant import QdrantVectorStore
 from openai import OpenAI
 import json
-
+import time
 
 load_dotenv()
 
@@ -31,11 +31,15 @@ SYSTEM_PROMPT = """
 You are a strict Quiz Master. 
 Your task is to generate a quiz based strictly on the provided CONTEXT below.
 User will give u the topic.
+
 Do not use outside knowledge. If the answer is not in the context, do not ask the question.
 
 --- CONTEXT START ---
 {context}
 --- CONTEXT END ---
+
+#RUlE:
+- If the question is out of context dont answer that question.
 
 Instructions:
 1. Create exactly 5 multiple-choice questions based on the context above.
@@ -75,24 +79,31 @@ data = json.loads(response.choices[0].message.content)
 
 quiz= data.get("quiz")
 
-print(f"🤖 Ready for the quiz..... ")
-
-score = 0
-
-for i, q in enumerate(quiz, 1):
-    print(f"\nQuestion {i}: {q['question']}")
-    
-    for key, value in q['options'].items():
-        print(f"{key}) {value}")
+if len(quiz)!=0:
     
 
-    user_choice = input("Your Answer: ").strip().upper()
+    print(f"🤖 Ready for the quiz..... ")
+
+    score = 0
+
+    for i, q in enumerate(quiz, 1):
+        print(f"\nQuestion {i}: {q['question']}")
     
-    if user_choice == q['correct_option']:
-        print("Correct!")
-        score += 1
-    else:
-        print(f"Wrong! The correct answer was {q['correct_option']}")
+        for key, value in q['options'].items():
+            print(f"{key}) {value}")
+    
 
-print(f"\nFinal Score: {score}/{len(quiz)}")
+        user_choice = input("Your Answer: ").strip().upper()
+    
+        if user_choice == q['correct_option']:
+            print("Correct!")
+            score += 1
+        else:
+            print(f"Wrong! The correct answer was {q['correct_option']}")
+        time.sleep(2)
 
+
+    print(f"\nFinal Score: {score}/{len(quiz)}")
+
+else:
+    print("🫵 Ask Pdf related Questions.😡")
